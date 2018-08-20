@@ -1,0 +1,1 @@
+export const rest_server = 'http://kruiz-online.local/';
