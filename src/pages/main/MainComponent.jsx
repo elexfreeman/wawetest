@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Link} from "react-router-dom";
-import {getList} from "../../models/clients_model";
+import {getList, setDeleted} from "../../models/clients_model";
 import {mysqlDatePipe} from "../../pipes/date_pipe";
 
 
@@ -12,9 +12,13 @@ class MainComponent extends Component {
             clients: []
             , client_total: 0
             , offset: 0
+            , deletedClient: 0
         };
 
         this.onGetList = this.onGetList.bind(this);
+        this.onDeleted = this.onDeleted.bind(this);
+        this.deleteClient = this.deleteClient.bind(this);
+        this.onCloseDeleteModal = this.onCloseDeleteModal.bind(this);
     }
 
     // после рендеринго
@@ -31,9 +35,31 @@ class MainComponent extends Component {
                 clients: resp.list.row
                 , client_total: parseInt(resp.list.total)
             });
-
         })
+    }
 
+    /*модалка поддтверждения удаления*/
+    onDeleted(client_id) {
+        this.setState({
+            deletedClient: parseInt(client_id)
+        })
+    }
+
+    /*удаление клиента*/
+    deleteClient() {
+        /*скрываем модалку*/
+        this.onCloseDeleteModal();
+        if (this.state.deletedClient > 0) {
+            setDeleted(this.state.deletedClient).then(resp => {
+                this.onGetList();
+            });
+        }
+    }
+
+    onCloseDeleteModal() {
+        this.setState({
+            deletedClient: 0
+        })
     }
 
     render() {
@@ -64,13 +90,35 @@ class MainComponent extends Component {
                         <td>{item.city}</td>
                         <td>{item.phone}</td>
                         <td>
-                            <button className="btn btn-action"><i className="icon icon-delete"></i></button>
+                            <button
+                                onClick={() => this.onDeleted(item.id)}
+                                className="btn btn-action"><i className="icon icon-delete"></i></button>
                         </td>
                     </tr>
                 )}
 
                 </tbody>
             </table>
+
+            <div className={
+                (this.state.deletedClient > 0) ? ("modal modal-sm active") : ("modal modal-sm")}>
+                <button className="modal-overlay" onClick={this.onCloseDeleteModal} aria-label="Close"></button>
+                <div className="modal-container" role="document">
+                    <div className="modal-header">
+                        <button className="btn btn-clear float-right" onClick={this.onCloseDeleteModal}></button>
+                        <div className="modal-title h5">Удаление клиента</div>
+                    </div>
+                    <div className="modal-body">
+                        <div className="content">
+                            Удалить
+                        </div>
+                    </div>
+                    <div className="modal-footer">
+                        <button className="btn btn-primary" onClick={this.deleteClient}>Да</button>
+                        <button className="btn" onClick={this.onCloseDeleteModal}>Отмена</button>
+                    </div>
+                </div>
+            </div>
 
         </div>)
     }
