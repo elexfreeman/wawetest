@@ -130,13 +130,19 @@ export function dateTimePipe(date) {
 
 
 
-
-
-
 // для даты
 export function mysqlDatePipe(input_date) {
     var d = moment(input_date);
     var tmp = d.format("DD.MM.YYYY");
     if(tmp=='Invalid date') tmp = '';
     return tmp;
+}
+
+export function intToDay(d) {
+    let dd = parseInt(d);
+    if (dd < 10) {
+        return '0' + d;
+    } else {
+        return d;
+    }
 }
